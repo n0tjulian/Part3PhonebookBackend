@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-// const { json } = require('express')
 require('dotenv').config()
 
 const cors = require('cors')
@@ -11,25 +10,28 @@ const Person = require('./models/person')
 app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())
-// app.use(morgan('tiny'))
 
-// eslint-disable-next-line no-unused-vars
 morgan.token('body', function (req, res) { return JSON.stringify(req.body)})
 
 app.use(morgan(':method :url :response-time ms :body'))
 
-app.get('/info',(request,response) => {
-	response.send(`<h1>Phonebook has info for ${persons.length} people</h1><p>${new Date()}</p>`)
+app.get('/info',(request,response,next) => {
+	Person.find({}).then(allPeople => {
+		response.send(`<h1>Phonebook has info for ${allPeople.length} people</h1><p>${new Date()}</p>`)
+	}).catch(error => next(error))
+
 })
 
 app.get('/',(request,response) => {
 	response.send('<h1> hello world! </h1>')
 })
 
-app.get('/api/persons',(request,response) => {
+app.get('/api/persons',(request,response,next) => {
 	Person.find({}).then(people => {
 		response.json(people)
-	})
+	}).catch(
+		error => next(error)
+	)
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
